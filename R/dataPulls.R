@@ -147,7 +147,7 @@ downloadData <- function(connectionDetails,
                          cdmDatabaseSchema,
                          andromedaData = Andromeda::andromeda(),
                          saveAndromedLocation
-)
+) {
 data <- andromedaData
 data$cohort <- getCohort(connectionDetails = connectionDetails,
                          cohortDatabaseSchema = resultsDatabaseSchema,
@@ -169,17 +169,9 @@ data$drugExposure <- getConditionOccurrence(connectionDetails = connectionDetail
                                             cohortDefinitionId = cohortDefinitionId) %>%
   dplyr::tibble()
 
-if (!is.null(saveAndromedLocation)) {
-  Andromeda::saveAndromeda(data, saveAndromedLocation)
+  if (!is.null(saveAndromedLocation)) {
+    Andromeda::saveAndromeda(data, saveAndromedLocation)
+  }
 }
-}
-
-
-downloadData(connectionDetails = connectionDetails,
-             cohortDatabaseSchema = resultsDatabaseSchema,
-             cdmDatabaseSchema = cdmDatabaseSchema,
-             cohortDefinitionId = cohortDefinitionId,
-             saveAndromedLocation = paste0(rstudioapi::getActiveProject(), "/data/data.zip")
-)
 
 

@@ -1,14 +1,31 @@
 library(magrittr)
+filePathSourceFiles <- "d:/ignore"
+source(paste0(filePathSourceFiles, "/ignoreThisFile.R"))
+library(cohortVisualization)
 
-connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = Sys.getenv("dbms"),
-                                                                server = Sys.getenv("server"),
-                                                                port = Sys.getenv("port")
+
+cdmDataSources <- redShiftConnectionDetailsMetaData %>% dplyr::filter(sourceKey == 'OPTUM_EXTENDED_DOD')
+
+connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = cdmDataSources$dbms,
+                                                                server = cdmDataSources$server,
+                                                                port = cdmDataSources$port,
+                                                                user = Sys.getenv("userSecureAWS"),
+                                                                password = Sys.getenv("passwordSecureAWS")
 )
-cdmDataSources <- ROhdsiWebApi::getCdmSources(baseUrl = Sys.getenv("baseUrl")) %>%
-  dplyr::filter(sourceKey == 'OPTUM_EXTENDED_DOD')
+
 cdmDatabaseSchema <- cdmDataSources$cdmDatabaseSchema
-resultsDatabaseSchema <- cdmDataSources$resultsDatabaseSchema
+resultsDatabaseSchema <- 'ohdsi_results_charlie' # cdmDataSources$resultsDatabaseSchema
 vocabDatabaseSchema <- cdmDataSources$vocabDatabaseSchema
 sourceName <- cdmDataSources$sourceName
 sourceDialect <- cdmDataSources$sourceDialect
-cohortDefinitionId <- 15908
+cohortDefinitionId <- 442
+
+
+
+cohortVisualization::downloadData(connectionDetails = connectionDetails,
+             cohortDatabaseSchema = resultsDatabaseSchema,
+             cdmDatabaseSchema = cdmDatabaseSchema,
+             cohortDefinitionId = cohortDefinitionId,
+             saveAndromedLocation = paste0(rstudioapi::getActiveProject(), "/data/data.zip")
+)
+
